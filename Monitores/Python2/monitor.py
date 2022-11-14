@@ -140,7 +140,7 @@ def main():
     fig = plt.figure(figsize=(10, 10))
     ax = plt.axes(xlim=(xmin, xmax), ylim=(float(ymin - (ymax - ymin) / 10), float(ymax + (ymax - ymin) / 10)))
     ax.set_title('Monitor')
-    ax.set_xlabel("Tiempo")
+    ax.set_xlabel("Tiempo en muestras")
     ax.set_ylabel("Magnitud")
     lineLabel = ['Referencia', 'Salida', 'Control']
     style = ['r-', 'c-', 'b-']  # linestyles for the different plots
