@@ -42,6 +42,8 @@ Todos los componentes pueden ser montados en un breadboard de acuerdo a la figur
 
 El modelo dinámico del circuito RC-RC es un sistema de segundo orden que puede ser representado en espacio de estados de la manera siguiente.
 
+![Planta RC-RC](./imagenes/planta.png)
+
 Primeramente, se usa la ley de mallas de Kirchhoff:
 ```math
 \begin{eqnarray*}
