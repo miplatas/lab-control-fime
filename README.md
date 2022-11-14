@@ -40,19 +40,20 @@ Todos los componentes pueden ser montados en un breadboard de acuerdo a la figur
 	
 ## Modelo
 
+El modelo dinámico del circuito RC-RC es un sistema de segundo orden que puede ser representado en espacio de estados de la manera siguiente.
 
-Utilizando la ley de mallas de Kirchhoff:
+Primeramente, se usa la ley de mallas de Kirchhoff:
 ```math
 \begin{eqnarray*}
-  u_i(t) & = & i_1(t)R_1+V_{C1}(t)  \\
-  V_{C1}(t) & = & i_2(t)R_2 + V_0(t) 
+  u_i(t) & = & i_1(t)R_1+V_{C1}(t),  \\
+  V_{C1}(t) & = & i_2(t)R_2 + V_0(t), 
 \end{eqnarray*}
 ```
 junto con las relaciones a ser cumplidas por los capacitores:
 ```math
 \begin{eqnarray*}
-  i_1(t)-i_2(t) & = & C_1 \frac{dV_{C1}(t)}{dt} \\
-  i_2(t) & = & C_2\frac{dV_{C2}(t)}{dt}
+  i_1(t)-i_2(t) & = & C_1 \frac{dV_{C1}(t)}{dt}, \\
+  i_2(t) & = & C_2\frac{dV_{C2}(t)}{dt},
 \end{eqnarray*}
 ```
 por lo tanto $i_1(t)=C_2\frac{dV_0(t)}{dt}+C_1\frac{dV_{C1}(t)}{dt}$
@@ -60,42 +61,42 @@ por lo tanto $i_1(t)=C_2\frac{dV_0(t)}{dt}+C_1\frac{dV_{C1}(t)}{dt}$
 Re escribiendo las ecuaciones de malla en funcion de los voltajes en los capacitores y sus derivadas:
 ```math
 \begin{eqnarray*}
-u_i(t) & = & R_1C_2 \frac{dV_0(t)}{dt} +  R_1C_1 \frac{dV_{C1}(t)}{dt} + V_{C1} \\
-V_{C1}(t) & = & R_2C_2 \frac{dV_0(t)}{dt} + V_0(t)
+u_i(t) & = & R_1C_2 \frac{dV_0(t)}{dt} +  R_1C_1 \frac{dV_{C1}(t)}{dt} + V_{C1}, \\
+V_{C1}(t) & = & R_2C_2 \frac{dV_0(t)}{dt} + V_0(t),
 \end{eqnarray*}
 ```
-acomodando en forma matricial:
+y acomodando en forma matricial, se tiene
 ```math
 \begin{eqnarray*}
-\left[\begin{array}{cc}R_1C_1 & R_1C_2 \\ 0 & R_2C_2\end{array}\right]\left[\begin{array}{l}\dot{V}_{C_1} \\ \dot{V}_o \end{array}\right] & = & \left[\begin{array}{rr}-1 & 0 \\ 1 & -1  \end{array}\right]\left[\begin{array}{l}V_{C_1}\\V_o\end{array}\right]+\left[\begin{array}{c}1 \\ 0 \end{array}\right]V_i
+\left[\begin{array}{cc}R_1C_1 & R_1C_2 \\ 0 & R_2C_2\end{array}\right]\left[\begin{array}{l}\dot{V}_{C_1} \\ \dot{V}_o \end{array}\right] & = & \left[\begin{array}{rr}-1 & 0 \\ 1 & -1  \end{array}\right]\left[\begin{array}{l}V_{C_1}\\V_o\end{array}\right]+\left[\begin{array}{c}1 \\ 0 \end{array}\right]V_i.
 \end{eqnarray*}
 ```
 
 Considerando la inversa:
 ```math
 \begin{eqnarray*}
-\left[\begin{array}{cc}R_1C_1 & R_1C_2 \\ 0 & R_2C_2\end{array}\right]^{-1} & = & \frac{1}{R_1C_1R_2C_2}\left[\begin{array}{cr}R_2C_2 & -R_1C_2 \\ 0 & R_1C_1\end{array}\right]\\ & = & \left[\begin{array}{cr}\frac{1}{R_1C_1} & \frac{-1}{R_2C_1} \\ 0 & \frac{1}{R_2C_2}\end{array}\right]
+\left[\begin{array}{cc}R_1C_1 & R_1C_2 \\ 0 & R_2C_2\end{array}\right]^{-1} & = & \frac{1}{R_1C_1R_2C_2}\left[\begin{array}{cr}R_2C_2 & -R_1C_2 \\ 0 & R_1C_1\end{array}\right]\\ & = & \left[\begin{array}{cr}\frac{1}{R_1C_1} & \frac{-1}{R_2C_1} \\ 0 & \frac{1}{R_2C_2}\end{array}\right],
+\end{eqnarray*}
+```
+el sistema queda:
+```math
+\begin{eqnarray*}
+  \left[\!\! \begin{array}{l}\dot{V}_{C_1} \\ \dot{V}_o \end{array}\!\! \right]\!\! & \!\! =\!\!  &\!\!  \left[\!\! \begin{array}{cr}\frac{1}{R_1C_1} & \frac{-1}{R_2C_1} \\ 0 & \frac{1}{R_2C_2}\end{array}\right]\!\! \left[\!\! \begin{array}{rr}-1 & 0 \\ 1 & -1  \end{array}\right]\!\! \left[\!\! \begin{array}{l}V_{C_1}\\V_o\end{array}\right]\!\! +\!\! \left[\!\! \begin{array}{cr}\frac{1}{R_1C_1} & \frac{-1}{R_2C_1} \\ 0 & \frac{1}{R_2C_2}\end{array}\right]\!\! \left[\!\! \begin{array}{c}1 \\ 0 \end{array}\!\! \right]u_i(t).
 \end{eqnarray*}
 ```
 
-El sistema queda:
-```math
-\begin{eqnarray*}
-  \left[\!\! \begin{array}{l}\dot{V}_{C_1} \\ \dot{V}_o \end{array}\!\! \right]\!\! & \!\! =\!\!  &\!\!  \left[\!\! \begin{array}{cr}\frac{1}{R_1C_1} & \frac{-1}{R_2C_1} \\ 0 & \frac{1}{R_2C_2}\end{array}\right]\!\! \left[\!\! \begin{array}{rr}-1 & 0 \\ 1 & -1  \end{array}\right]\!\! \left[\!\! \begin{array}{l}V_{C_1}\\V_o\end{array}\right]\!\! +\!\! \left[\!\! \begin{array}{cr}\frac{1}{R_1C_1} & \frac{-1}{R_2C_1} \\ 0 & \frac{1}{R_2C_2}\end{array}\right]\!\! \left[\!\! \begin{array}{c}1 \\ 0 \end{array}\!\! \right]u_i(t)
-\end{eqnarray*}
-```
-definiendo las variables de estado como sigue:
+Definiendo las variables de estado como sigue;
 ```math
 \begin{eqnarray*}
   x_1(t) & \stackrel{\triangle}{=} & V_{C1}(t), \\
-  x_2(t) & \stackrel{\triangle}{=} & V_{C2}(t)=V_0(t).
+  x_2(t) & \stackrel{\triangle}{=} & V_{C2}(t)=V_0(t),
 \end{eqnarray*}
 ```
-El modelo en espacio de estados es: 
+el modelo en espacio de estados es: 
 ```math
 \begin{eqnarray*}
   \left[\!\!\begin{array}{l}\dot{x}_{1}(t) \\ \dot{x}_2 (t) \end{array}\!\!\right] & = &  \left[\!\!\begin{array}{cr}-\frac{1}{R_1C_1}-\frac{1}{R_2C_1} & \frac{1}{R_2C_1} \\ \frac{1}{R_2C_2} & -\frac{1}{R_2C_2}\end{array}\!\!\right]\!\!\left[\begin{array}{l}x_{1}(t) \\ x_2(t) \end{array}\!\!\right]\!\!+\!\!\left[\!\!\begin{array}{c}\frac{1}{R_1C_1} \\ 0 \end{array}\right]u_i(t) \\ 
-  y(t) & = & \left[\begin{array}{cc}0 & 1\end{array}\right]\left[\begin{array}{c}x_{1}(t) \\ x_2(t) \end{array}\right]
+  y(t) & = & \left[\begin{array}{cc}0 & 1\end{array}\right]\left[\begin{array}{c}x_{1}(t) \\ x_2(t) \end{array}\right],
 \end{eqnarray*}
 ```
 donde $x_{1}(t)$ es el voltaje en el primer capacitor (conectado al pin A1), $x_{2}(t)$ el voltaje en el segundo (conectado al pin A2), $u(t)$ es la entrada a la planta (conectado al pin 10), y $y(t)$ la salida de la planta (conectado al pin A2). 
@@ -106,7 +107,7 @@ donde $x_{1}(t)$ es el voltaje en el primer capacitor (conectado al pin A1), $x_
 
 Se usa un controlador por retroalimentación de estado con ley de control dada por
 ```math
-u(t) = K_p r(t) - K_1 x_1(t) - K_2 x_2(t)
+u(t) = - K_1 x_1(t) - K_2 x_2(t)
 ```
 ### Observador
 
