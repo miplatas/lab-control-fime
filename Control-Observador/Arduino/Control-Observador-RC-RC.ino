@@ -285,7 +285,7 @@ void espera(){
 }
 
 
-//-- Comunicación con monitor --//
+//-- Comunicación con monitor Arduino IDE--//
 void coms_arduino_ide(){  
   Serial.print("y_d(t):");            // Referencia
   Serial.print(R);                    // Referencia
@@ -294,7 +294,7 @@ void coms_arduino_ide(){
   Serial.println(Y);                  // Salida (terminar con "serial.println")
 }
 
-
+// -- Comunicación con python "monitor.py" --//
 void coms_python(float* Rp, float* Yp, float* Up)
 {
   byte* byteData1 = (byte*)(Rp);
