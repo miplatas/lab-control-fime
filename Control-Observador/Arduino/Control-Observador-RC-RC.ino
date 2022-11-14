@@ -1,4 +1,4 @@
-// Control-Observador-RC2
+// Control-Observador-RC-RC
 
 // ******************************************************** //
 //                                                          //
