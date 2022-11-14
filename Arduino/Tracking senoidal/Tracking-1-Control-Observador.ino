@@ -218,8 +218,8 @@ void loop() {
   observador();                       // Observador
   control();                          // Control
   proc_salidas();                     // Procesado de Salidas
-  //coms_arduino_ide();               // Comunicaciones
-  coms_python(&Rw,&Y,&U);
+  coms_arduino_ide();               // Comunicaciones
+  //coms_python(&Rw,&Y,&U);
   espera();
 }
 
