@@ -140,10 +140,10 @@ def main():
     fig = plt.figure(figsize=(10, 10))
     ax = plt.axes(xlim=(xmin, xmax), ylim=(float(ymin - (ymax - ymin) / 10), float(ymax + (ymax - ymin) / 10)))
     ax.set_title('Monitor')
-    ax.set_xlabel("Tiempo en muestras")
+    ax.set_xlabel("Tiempo en muestras a " + str(pltInterval) + " mseg.")
     ax.set_ylabel("Magnitud")
     lineLabel = ['Referencia', 'Salida', 'Control']
-    style = ['r-', 'c-', 'b-']  # linestyles for the different plots
+    style = ['r', 'k-', 'b:']  # linestyles for the different plots
     timeText = ax.text(0.70, 0.95, '', transform=ax.transAxes)
     lines = []
     lineValueText = []
@@ -153,6 +153,7 @@ def main():
     anim = animation.FuncAnimation(fig, s.getSerialData, fargs=(lines, lineValueText, lineLabel, timeText,RecData), interval=pltInterval)    # fargs has to be a tuple
 
     plt.legend(loc="upper left")
+    plt.grid()
     plt.show()
     
     s.close(RecData)
