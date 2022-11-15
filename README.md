@@ -599,7 +599,7 @@ Esta configuración se encuentra al inicio sel script.
 
 #### Rutina de inicio
 
-En esta rutina, se calculan de manera simbólica las ganancias K y L, así como el modelo que será usado para observar (A,B,C).
+La rutina setup() se ejecuta una única ocasión al iniciar el programa. En esta rutina, se calculan de manera simbólica las ganancias K y L, así como el modelo que será usado para observar (A,B,C). En adición se configuran IO y la comunicación serial.
 
 ```cpp
 // ******************************************************** //
@@ -645,7 +645,7 @@ void setup() {
 ```
 
 #### Rutina principal
-La rutina principal realiza las tareas de procesamiento de entradas, estimación del estado, control, procesado de salidas, comunicaciones con monitor, y espera. Las funciones observador() y control() realizan los algoritmos descritos en secciones anteriores, el resto de las funciones sirve para manejar IO, counicación serial y control de muestreo uniforme. 
+La rutina loop() se ejecuta de manera cíclica, siendo la rutina principal. Ésta realiza las tareas de procesamiento de entradas, estimación del estado, control del sistema, procesado de salidas, comunicaciones con PC, y control de muestreo uniforme. Las funciones observador() y control() realizan los algoritmos descritos en sección **Diseño**, el resto de las funciones sirve para manejar IO, counicación serial y control de muestreo uniforme. 
 ```cpp
 // ******************************************************** //
 //---------- Rutinia principal  --------//                  //
@@ -655,15 +655,15 @@ void loop() {
   observador();                       // Observador
   control();                          // Control
   proc_salidas();                     // Procesado de Salidas
-  coms_arduino_ide();               // Comunicaciones
+  coms_arduino_ide();                 // Comunicaciones
   //coms_python(&Rw,&Y,&U);
-  espera();
+  espera();			      // Muestreo uniforme
 }
 ```
 
 #### Rutinas de control
 
-Esta rutina realiza la retroalimentación de estado. Se usan los estados XeR1 y XeR1 estimados por el observador, se usa el término Kp*R para seguir a la referencia. 
+Esta rutina realiza la retroalimentación de estado descrita en la sección **Diseño/Solución por cambio de coordenadas**. Se usan los estados XeR1 y XeR1 estimados por el observador, se usa el término Kp*R para seguir a la referencia. 
 
 ```cpp
 //-- Control --//
@@ -679,7 +679,8 @@ void control(){
 
 #### Rutinas de observador
 
-Se usa el método de Euler para hacer dos integradores, la dinámica a integrar es expresada en las funciones f1 y f2. El modelo A,B,C y las ganancias H1,H2 fueron calculados en la rutina de configuración setup().
+Se implementa un observador de Luenberger descrito en **Diseño/Observador de Luenberger**
+Se usa el método de Euler para implementarr los integradores, la dinámica a integrar es expresada en las funciones f1 y f2. El modelo A,B,C y las ganancias H1,H2 fueron calculados en la rutina de configuración setup().
 ```cpp
 //-- Observador para estimar X1 --//
 void observador(){
@@ -699,11 +700,9 @@ void observador(){
 
 #### Rutinas IO
 
-* La rutina proc_entradas() es usada para leer las señales analógicas provenientes del potenciomentro de refencia, y de los voltajes en capacitores. 
-* La rutina proc_salidas() es usada para generar una señal PWM que alimenta la red RC-RC. Esta señal se puede considerar como una salida analógica de 0 a 5V debido a que las constantes de tiempo del sistema son lentas en comparación con la frecuencia de la señal PWM.
-* La rutina botonesyleds() sirve para controlar la activación y desactivación de una memoria. esta memoria sirve para introducir cambios escalón al sistema, y para indicar el estado habilitado/inhabilidato del mismo.
-
-
+* La rutina proc_entradas() es usada para **leer las señales analógicas** provenientes del potenciomentro de refencia, y de los voltajes en capacitores. 
+* La rutina proc_salidas() es usada para **generar una señal PWM** que alimenta la red RC-RC. Esta señal se puede considerar como una salida analógica de 0 a 5V debido a que las constantes de tiempo del sistema son lentas en comparación con la frecuencia de la señal PWM.
+* La rutina botonesyleds() sirve para **controlar la activación y desactivación de una memoria**. esta memoria sirve para introducir cambios escalón al sistema, y para indicar el estado habilitado/inhabilidato del mismo.
 ```cpp
 // ******************************************************** //
 //---------- Rutinias de IO y control de tiempo     --------//                          
