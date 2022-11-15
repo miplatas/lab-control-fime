@@ -204,19 +204,30 @@ $$l_2=b_1+b_2-\frac{1}{R_1C_1}-\frac{1}{R_2C_2}-\frac{1}{R_2C_2}.$$
 #### Solución por cambio de coordenadas
 
 Enseguida se resuelve el problema de servomecanismo:
+```math
 $$u(t) = -Kx(t)+g \cdot y_r$$ 
+```
 
-$$g = \left[\begin{array}{cc}K & 1 \end{array}\right]\left[\begin{array}{cc}A & B \\C & D\end{array}\right]^{-1}\left[\begin{array}{c}0 \\ 0 \\ 1\end{array}\right]$$
+Donde $K$ representa la matriz de ganancias calculada previamente, y $g$ es una preconpensación a la referencia y está dada por:
+```math
+$$g = \left[\begin{array}{cc}K & 1 \end{array}\right]\left[\begin{array}{cc}A & B \\ C & D\end{array}\right]^{-1}\left[\begin{array}{c}0 \\ 0 \\ 1\end{array}\right]$$
+```
 
+```math
 $$g = \left[\begin{array}{ccc}k_1 & k_2 & 1\end{array}\right]\left[\begin{array}{ccc} -\frac{1}{R_1C_1}-\frac{1}{R_2C_1} & \frac{1}{R_2C_1} & \frac{1}{R_1C_1} \\ \frac{1}{R_2C_2} & -\frac{1}{R_2C_2}  & 0 \\ 0 & 1 & 0\end{array}\right]^{-1}\left[\begin{array}{c}0 \\ 0 \\ 1\end{array}\right]$$
+```
 
+```math
 $$g = \left[\begin{array}{ccc}k_1 & k_2 & 1\end{array}\right]\left[\begin{array}{ccc} 0 & R_2C_2 & 1 \\ 0 & 0  &  1 \\ R_1C_1 & R_2C_2+R_1C_2 & 1\end{array}\!\!\right]\left[\begin{array}{c}0 \\ 0 \\ 1\end{array}\right]$$
+```
 
+```math
 $$g = k_1+k_2+1$$
+```
 
 #### Solución mediante control integral para sistemas tipo 0
 
-Claramente el sistema es tipo 0 (sin polos en el origen), y se requiere agregar un integrador en la ganancia de lazo.
+Claramente el sistema es tipo 0 (sin polos en el origen), por lo que es posible agregar un integrador en la ganancia de lazo para asegurar un error en estado estacionario nulo ante una entrada escalón unidad.
 ```math
 \begin{eqnarray*}
 u(t) & = & -K x(t) + k_0 x_0(t) \\
@@ -231,7 +242,7 @@ Cerrando el lazo, la matriz del sistema extendido retroalimentado queda:
 \end{eqnarray*}
 ```
 
-El polinomio caracter\'{\i}stico deseado resulta:
+El polinomio característico deseado resultante es:
 ```math
 \begin{eqnarray*}
 \lambda^3\!\!+(a1\!+\!a2\!+\!a3)\lambda^2 + (a1a3\!+\!a2a3\!+\!a1a2)\lambda\!+\!a1a2a3 = 0
