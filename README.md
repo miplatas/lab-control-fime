@@ -790,4 +790,4 @@ void espera(){
 
 ### Software PC
 
-En adición al monitor serial, puede usar el script "monitor.py" localizado en la carpeta monitores. Este script realiza el monitore de datos en una gráfica y el registro de los mismos a un archivo CSV.
+En adición al monitor serial, puede usar el script "monitor.py" localizado en la carpeta monitores. Este script realiza el monitore de datos en una gráfica y el registro de los mismos a un archivo CSV. Para usar este script, es necesario descomentar coms_python() y comentar coms_arduino_ide() en el script del microcontrolador. 
