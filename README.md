@@ -3,7 +3,9 @@
 ## Tabla de contenidos
 * [Información general](#Información)
 * [Descripción del Hardware usado](#Hardware)
-* [Descripción de los controladores usados](#Software)
+* [Modelo matemático](#Modelado)
+* [Diseño de controladores y observadores](#Diseño)
+* [Descripción del Software usado](#Software)
 
 ## Información
 Este proyecto muestra como implementar controladores y observadores lineales mediante la plataforma Arduino.
@@ -47,7 +49,7 @@ Las entradas y salidas del sistema están conectadas a los siguientes pines.
 * **Pin 8.** Indicador LED sistema activado, denotado por LED8 en el software.
 * **Pin 9.** Indicador LED sistema desactivado, denotado por LED9 en el software.
 	
-## Modelo matemático
+## Modelado
 
 Consideramos al voltaje $u_i(t)$ que alimenta a la primer malla como la entrada de la planta RC-RC, y al voltaje en el segundo capacitor $V_{C_2}(t)$ como salida. La descripción del circuito es mostrada a continuación.
 
@@ -124,7 +126,9 @@ donde
 A=\left[\!\!\begin{array}{cr}-\frac{1}{R_1C_1}-\frac{1}{R_2C_1} & \frac{1}{R_2C_1} \\ \frac{1}{R_2C_2} & -\frac{1}{R_2C_2}\end{array}\!\!\right], \quad B=\left[\!\!\begin{array}{c}\frac{1}{R_1C_1} \\ 0 \end{array}\right], \quad C=\left[\begin{array}{cc}0 & 1\end{array}\right].
 ```
 
-## Diseño de controladores y observadores
+## Diseño
+
+En todos los algoritmos descritos, los cálculos de las ganancias se realizan de manera simbólica, quedando expresadas las ganancias de controladores y observadores en función de los parámetros del sistema, y las posiciones deseadas para los valores propios. 
 
 ### Regulador por retroalimentación de estado
 
@@ -175,7 +179,7 @@ Considere un observador descrito por:
 \end{eqnarray*}
 ```
 Donde $A,B,C$ corresponden a las matrices definidas para el sistema RC-RC a observar, y $L = [l_1 \quad l_2]$ representa las ganancias del observador. 
-Para garantizar $\textrm{lim}_{t\rightarrow \infty }x_e(t) = x(t)$ es necesario ubicar los vaores propios de $A-LC$ mediante $L$.
+Para garantizar $\textrm{lim}_{t\rightarrow \infty }x_e(t) = x(t)$ es necesario garantizar que todos los vaores propios de $A-LC$ tengan parte real negativa, lo anterior se realiza ubicando a los valores propies de $A-LC$ en posiciones deseadas mediante $L$.
 
 Determinando el polinomio característico del observador:
 ```math
@@ -259,111 +263,141 @@ k_2 & = & R_1C_1\left[R_2C_2\left(a1a3+a2a3+a1a2\right)+\frac{1}{R_2C_1}\right]
 
 ### Seguimiento de trayectorias (Tracking)
 
-La soluci\'on al problema de seguimiento se plantea con la siguiente ley de control
+La solución al problema de seguimiento se plantea con la siguiente ley de control
 ```math
 \begin{eqnarray}
-  u(t) & = & -Kx(t) + g y_d + G z(t) \nonumber\\ 
-  \mbox{donde:} & & \nonumber \\
-  \dot z (t) & = & Wz(t),\ \ z(0) \nonumber \\
-  G & = & \Gamma + K \cdot \Pi \nonumber\\
-  \Pi\cdot W & = & A\cdot\Pi+B\cdot \Gamma \label{eq:reg1}\\
-  0 & = & C\cdot\Pi+D\cdot \Gamma - C_r\label{eq:reg2} 
+  u(t) & = & -Kx(t) + g y_d + G z(t) \\ 
 \end{eqnarray}
+```  
+  donde:
+  ```math
+  \begin{eqnarray}
+  \dot z (t) & = & Wz(t),\ \ z(0)  \\
+  G & = & \Gamma + K \cdot \Pi \\
+  \Pi\cdot W & = & A\cdot\Pi+B\cdot \Gamma \\
+  0 & = & C\cdot\Pi+D\cdot \Gamma - C_r
+  \end{eqnarray}
 ```
 
-$K$ es seleccionada tal que $A-BK$ tenga valores propios con parte real negativa y $g$ es la misma que se utiliz\'o en la soluci\'on al problema de servomecanismo.
+$K$ es seleccionada tal que $A-BK$ tenga valores propios con parte real negativa y $g$ es la misma que se utilizó en la solución al problema de servomecanismo.
 
-La se\~nal de referencia se genera mediante un exo-sistema sin entradas, es decir, un oscilador arm\'onico. Para obtener la referencia se considera el sistema 
+La señal de referencia se genera mediante un exo-sistema sin entradas, es decir, un oscilador armónico. Para obtener la referencia se considera el sistema 
 ```math
 \begin{eqnarray*}
- \dot{z}(t) & = & Wz(t) \ \ \ z(0)\in\Re^r \\ 
-       r(t) & = & C_r z(t) 
+ \dot{z}(t) & = & Wz(t), \quad z(0)\in\Re^r, \\ 
+       r(t) & = & C_r z(t).
 \end{eqnarray*}
 ```
 
 Se consideran dos señales de referencia:
-\begin{enumerate}
-  \item[a)] Referencia $r(t)=sen(\omega t)$. Se hace la siguiente selecci\'on:
+* Referencia $r(t)=sen(\omega t)$. Se hace la siguiente selección:
+  ```math
   $$W=\left[\begin{array}{rc} 0 & \omega \\ -\omega & 0 \end{array} \right];\ \ z(0)=\left[\begin{array}{c} 0 \\ 1 \end{array} \right];\ \ C_r=\left[\begin{array}{cc}1 & 0 \end{array}\right]$$
-  lo cual produce una senoidal:
+  ```
+  lo cual produce una senoidal de frecuencia $\omega$.
   
-  \centerline{\includegraphics[scale=0.5]{seno.eps}}
-  \item[b)] Referencia $r(t)=sen(\omega_1 t)+\frac{1}{3} sen(\omega_2 t)$, con $\omega_2 = 3 \omega_1$
-
+* Referencia $r(t)=sen(\omega_1 t)+\frac{1}{3} sen(\omega_2 t)$, con $\omega_2 = 3 \omega_1$
+```math
 $$  W=\left[\begin{array}{ccll}0 & 0 & 0 & \omega_1\\ 0 & 0 & \omega_2 & 0\\ 0 & -\omega_2 & 0 & 0\\-\omega_1 & 0 & 0 & 0\end{array}\right];\ \ \ z(0)=\left[\begin{array}{r}1 \\ \displaystyle\frac{1}{3} \\ 0 \\ -1\end{array}\right];\ \ C_r=\left[\begin{array}{cccc}1 & 0 & 1 & 0\end{array}\right]
 $$
+```
+lo cual produce una señal periodica de frecuencia $\omega$ que contiene dos tonos, uno en $\omega_1$ y otro en $\omega_2$.
 
 #### Seguimiento de cosenoidal
 
-Se utiliza la misma $K$ obtenida previamente para los otros controladores as\'{\i} como la $g$ obtenida previamente para el problema de servomecanismo. 
+Se utiliza la misma $K$ obtenida previamente para los otros controladores así como la $g$ obtenida previamente para el problema de servomecanismo. 
  
-Particularizando para el caso de la referencia senoidal se tiene que las ecuaciones del regulador, primero la ecuaci\'on (\ref{eq:reg1}):
+Particularizando para el caso de la referencia senoidal se tiene que las ecuaciones del regulador, primero la ecuación (\ref{eq:reg1}):
+```math
 \begin{eqnarray*}
 \left[\!\!\begin{array}{cc}\Pi_{11} & \Pi_{12}\\ \Pi_{21} & \Pi_{22}\end{array}\!\!\right]\!\!\left[\!\!\begin{array}{cc} 0 & \omega\\ -\omega & 0\end{array}\!\!\right]\!\! & = & \!\!\left[\!\!\!\begin{array}{cr}  -\frac{1}{R_1C_1}-\frac{1}{R_2C_1} & \frac{1}{R_2C_1} \\ \frac{1}{R_2C_2} & -\frac{1}{R_2C_2}\end{array}\!\!\right]\!\!\left[\!\!\begin{array}{cc}\Pi_{11} & \Pi_{12}\\ \Pi_{21} & \Pi_{22}\end{array}\!\!\right]\!\!+\!\!\left[\!\!\begin{array}{c}\frac{1}{R_1C_1} \\  0\end{array}\!\!\!\right]\!\!\left[\Gamma_1\ \ \Gamma_2\right]
 \end{eqnarray*}
+```
 realizando operaciones:
+```math
 \begin{eqnarray*}
 \left[\!\!\begin{array}{cc}-\omega\Pi_{12} & \omega\Pi_{11}\\ -\omega\Pi_{22} & \omega\Pi_{21}\end{array}\!\!\right]\!\! & = & \!\!\left[\!\!\!\begin{array}{cc}  -\frac{\Pi_{11}}{R_1C_1}-\frac{\Pi_{11}-\Pi_{21}}{R_2C_1} & -\frac{\Pi_{12}}{R_1C_1}-\frac{\Pi_{12}-\Pi_{22}}{R_2C_1} \\ \frac{\Pi_{11}}{R_2C_2}-\frac{\Pi_{21}}{R_2C_2} & \frac{\Pi_{12}}{R_2C_2}-\frac{\Pi_{22}}{R_2C_2}\end{array}\!\!\right]\!+\!\left[\!\!\begin{array}{cc}\frac{\Gamma_1}{R_1C_1} & \frac{\Gamma_2}{R_1C_1} \\  0 & 0 \end{array}\!\!\!\right]
 \end{eqnarray*}
+```
 de donde resulta el siguiente sistema de ecuaciones:
+```math
 \begin{eqnarray*}
 -\omega\Pi_{12} & = & -\left(\frac{\Pi_{11}}{R_1C_1}+\frac{\Pi_{11}}{R_2C_1}\right)+\frac{\Pi_{21}}{R_2C_1}+\frac{\Gamma_1}{R_1C_1} \\ 
 \omega\Pi_{11}  &= &-\left(\frac{\Pi_{12}}{R_1C_1}+\frac{\Pi_{12}}{R_2C_1}\right)+\frac{\Pi_{22}}{R_2C_1}+\frac{\Gamma_2}{R_1C_1} \\
  -\omega\Pi_{22} & = & \frac{\Pi_{11}}{R_2C_2}-\frac{\Pi_{21}}{R_2C_2} \\ 
  \omega\Pi_{21} & = & \frac{\Pi_{12}}{R_2C_2}-\frac{\Pi_{22}}{R_2C_2} 
 \end{eqnarray*}
+```
 Ahora para la ecuaci\'on (\ref{eq:reg2}), se tiene:
+```math
 \begin{eqnarray*}
 \left[\begin{array}{cc}0 & 0 \end{array}\right] & = & \left[\begin{array}{cc}0 & 1 \end{array}\right]\left[\begin{array}{cc}\Pi_{11} & \Pi_{12} \\ \Pi_{21} & \Pi_{22}\end{array}\right]-\left[\begin{array}{cc}1 & 0 \end{array}\right]
 \end{eqnarray*}
+```
 simplificando queda:
+```math
 \begin{eqnarray*}
 \left[\begin{array}{cc}0 & 0 \end{array}\right] & = &  \left[\begin{array}{cc}\Pi_{21} & \Pi_{22} \end{array}\right]-\left[\begin{array}{cc}1 & 0 \end{array}\right]
 \end{eqnarray*}
+```
 y quedan las dos ecuaciones:
+```math
 \begin{eqnarray*}
 0 & = & \Pi_{21}-1 \\
 0 & = & \Pi_{22}
 \end{eqnarray*}
+```
 Por lo tanto los primeros dos valores para los elementos de $\Pi$ son: $\boxed{\Pi_{21}=1}$ y $\boxed{\Pi_{22}=0}$
 y para los otros valores:
+```math
 \begin{eqnarray*}
  -\omega (0) & = &  \frac{\Pi_{11}}{R_2C_2}-\frac{(1)}{R_2C_2} \ \Rightarrow\ \boxed{\Pi_{11}=1}\\ 
  \omega (1) & = & \omega\frac{\Pi_{12}}{R_2C_2}-\frac{0}{R_2C_2}\ \Rightarrow \boxed{\Pi_{12}=\omega R_2C_2}   \\ \omega (1) & = & -\left(\frac{\omega R_2C_2}{R_1C_1}+\frac{\omega R_2C_2}{R_2C_1}\right)+\frac{(0)}{R_2C_1}+\frac{\Gamma_1}{R_1C_1}\\[2mm] \Gamma_1 & = & \left[\omega + \left(\frac{\omega R_2C_2}{R_1C_1}+\frac{\omega R_2C_2}{R_2C_1}\right)\right] R_1C_1\\[2mm] -\omega (1) & = & -\left(\frac{(1)}{R_1C_1}+\frac{(1)}{R_2C_1}\right)(1)+\frac{(0)}{R_2C_1}+\frac{\Gamma_2}{R_1C_1}\\[2mm] \Gamma_2 & = & \left[\frac{1}{R_1C_1}+\frac{1}{R_2C_1}-\omega\right]R_1C_1
 \end{eqnarray*}
+```
 y entonces calculando el valor de la ganancia $G$
+```math
 \begin{eqnarray*}
 G & = & \Gamma + K\Pi \\[2mm] 
 G & = & \left[\begin{array}{cc}k_1+k_2+1-\omega^2R_2C_2R_1C_1 & \omega\left(R_1C_1+R_2C_2+R_1C_2+k_1R_2C_2\right) \end{array}\right]
 \end{eqnarray*}
+```
 
 #### Seguimiento de referencia sumatoria de cosenoidales
 
 Particularizando para el caso de la referencia correspondiente se tiene que las ecuaciones del regulador, primero la ecuaci\'on (\ref{eq:reg2}):
+```math
 \begin{eqnarray*}
 \left[\begin{array}{cccc} 0 & 0 & 0 & 0\end{array}\right] & = & \left[\begin{array}{cc}0 & 1\end{array}\right]\left[\begin{array}{cccc}\Pi_{11} & \Pi_{21} & \Pi_{31} & \Pi_{41} \\ \Pi_{21} & \Pi_{22} & \Pi_{23} & \Pi_{24}\end{array}\right]-\left[\begin{array}{cccc} 1 & 0 & 1 &  0\end{array}\right] \\[3mm] 
 \left[\begin{array}{cccc} 0 & 0 & 0 & 0\end{array}\right] & = & \left[\begin{array}{cccc}\Pi_{21} & \Pi_{22} & \Pi_{23} & \Pi_{24}\end{array}\right]-\left[\begin{array}{cccc} 1 & 0 & 1 &  0\end{array}\right]
 \end{eqnarray*}
+```
 de donde se obtienen los valores de cuatro elementos de la matriz $\Pi$:
+```math
 \begin{eqnarray*}
 0 & = & \Pi_{21} - 1;\ \ \ \ \Rightarrow\ \ \Pi_{21}=1 \\ 
 0 & = & \Pi_{22};\ \ \ \ \Rightarrow\ \ \Pi_{22}=0 \\
 0 & = & \Pi_{23} - 1;\ \ \ \ \Rightarrow\ \ \Pi_{23}=1 \\ 
 0 & = & \Pi_{24};\ \ \ \ \Rightarrow\ \ \Pi_{24}=0 
 \end{eqnarray*}
+```
 
-
+```math
 \begin{eqnarray*}
 \left[\begin{array}{cccc}\Pi_{11} & \Pi_{21} & \Pi_{31} & \Pi_{41} \\ \Pi_{21} & \Pi_{22} & \Pi_{23} & \Pi_{24}\end{array}\right] \left[\begin{array}{ccll}0 & 0 & 0 & \omega_1\\ 0 & 0 & \omega_2 & 0\\ 0 & -\omega_2 & 0 & 0\\-\omega_1 & 0 & 0 & 0\end{array}\right] & = & A \left[\begin{array}{cccc}\Pi_{11} & \Pi_{21} & \Pi_{31} & \Pi_{41} \\ \Pi_{21} & \Pi_{22} & \Pi_{23} & \Pi_{24}\end{array}\right] + \left[\begin{array}{c}\frac{1}{R_1C_1} \\ 0\end{array}\right]
 \end{eqnarray*}
+```
 
+```math
 \begin{eqnarray*}
 \left[\begin{array}{cccc}-\omega_1 \Pi_{14} & -\omega_2\Pi_{13} & \omega_2\Pi_{12} & \omega_1\Pi_{11} \\ -\omega_1\Pi_{24} & -\omega_2\Pi_{23} & \omega_2\Pi_{22} & \omega_1\Pi_{21}\end{array}\right] & = & \left[\begin{array}{cc}-\frac{\Pi_{11}}{R_1C_1}-\frac{\Pi_{11}}{R_2C_1}+\frac{\Pi_{21}}{R_2C_1} & -\frac{\Pi_{12}}{R_1C_1}-\frac{\Pi_{12}}{R_2C_1}+\frac{\Pi_{22}}{R_2C_1} \\ \frac{\Pi_{11}}{R_2C_2}-\frac{\Pi_{21}}{R_2C_2} &  \frac{\Pi_{12}}{R_2C_2}-\frac{\Pi_{22}}{R_2C_2} \end{array}\right. \\ & & \left.\begin{array}{cc}-\frac{\Pi_{13}}{R_1C_1}-\frac{\Pi_{13}}{R_2C_1}+\frac{\Pi_{23}}{R_2C_1} & -\frac{\Pi_{14}}{R_1C_1}-\frac{\Pi_{14}}{R_2C_1}+\frac{\Pi_{24}}{R_2C_1} \\ \frac{\Pi_{13}}{R_2C_2}-\frac{\Pi_{23}}{R_2C_2} &  \frac{\Pi_{14}}{R_2C_2}-\frac{\Pi_{24}}{R_2C_2}\end{array}\right] \\ 
 & & +\left[\begin{array}{cccc}
 \frac{\Gamma_1}{R_1C_1} & \frac{\Gamma_2}{R_1C_1} & \frac{\Gamma_3}{R_1C_1} & \frac{\Gamma_4}{R_1C_1} \\ 
 0 & 0  & 0 & 0 \end{array}\right]
 \end{eqnarray*}
+```
 de donde resulta el siguiente sistema de ecuaciones
+```math
 \begin{eqnarray*}
 -\omega_1\Pi_{14} & = & -\frac{\Pi_{11}}{R_1C_1}-\frac{\Pi_{11}}{R_2C_1}+\frac{\Pi_{21}}{R_2C_1}+\frac{\Gamma_1}{R_1C_1} \\ 
 -\omega_2\Pi_{13} & = & -\frac{\Pi_{12}}{R_1C_1}-\frac{\Pi_{12}}{R_2C_1}+\frac{\Pi_{22}}{R_2C_1}+\frac{\Gamma_2}{R_1C_1} \\ 
@@ -374,22 +408,28 @@ de donde resulta el siguiente sistema de ecuaciones
 -\omega_2\Pi_{22} & = & \frac{\Pi_{13}}{R_2C_2}-\frac{\Pi_{23}}{R_2C_2}  \\ 
 -\omega_1\Pi_{21} & = & \frac{\Pi_{14}}{R_2C_2}-\frac{\Pi_{24}}{R_2C_2} 
 \end{eqnarray*}
+```
 de donde se obtiene:
+```math
 \begin{eqnarray*}
  \Pi_{11} & = & 1 \\
  \Pi_{12} & = & -\omega_2R_2C_2 \\
  \Pi_{13} & = & 1\\
  \Pi_{14} & = & \omega_1R_2C_2
 \end{eqnarray*}
-
+```
+```math
 \begin{eqnarray*}
  \Gamma_{1} & = & 1 -\omega_1^2R_1C_1R_2C_2 \\
  \Gamma_{2} & = & \omega_2 C_2\left(R_2 + R_1\right) \\
  \Gamma_{3} & = & R_1C_1\left(-\omega_2^2R_2C_2+\frac{1}{R_1C_1}+\frac{1}{R_2C_1}\right) \\
  \Gamma_{4} & = & \omega_1\left(1 + \frac{R_2C_2}{R_1C_1}+ \frac{R_2C_2}{R_2C_1}\right)
 \end{eqnarray*}
+```
 Por lo tanto:
+```math
 $$G=\left[\begin{array}{cccc}\Gamma_1+k_1 + k_2 & \Gamma_2-k_1\omega_2R_2C_2 & \Gamma_3+k_1+k_2 & \Gamma_4+\omega_1k_1R_2C_1\end{array}\right]$$
+```
 
 ## Software
 
