@@ -435,9 +435,12 @@ $$G=\left[\begin{array}{cccc}\Gamma_1+k_1 + k_2 & \Gamma_2-k_1\omega_2R_2C_2 & \
 
 ### Software Arduino
 
-Todos los algoritmos se implementan en el microcontrolador ATMEL de la plataforma arduino. Los códigos están realizados en el lenguaje Arduino.
+Todos los algoritmos se implementan en el microcontrolador ATmega328P. Los códigos están realizados en el lenguaje Arduino.
 La carpeta Arduino contiene varios ejemplos que se detallas a continuación.
 
-
+* [Controlador y Observador](lab-control-fime/Arduino/1-Control-Observador-RC2/)
+* [Controlador integral y Observador](lab-control-fime/Arduino/2-Integal-Control-Observador-RC2/)
+* [Tracking de señal sinusoidal y Observador](lab-control-fime/Arduino/3-Tracking-Control-Observador-RC2/)
+* [Tracking de señal multitono y Observador](lab-control-fime/Arduino/4-Tracking-2-Control-Observador-RC2/)
 
 ### Software PC
