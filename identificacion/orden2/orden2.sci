@@ -2,7 +2,8 @@
 clc
 clear
 // ---------------------------------------------
-// Sistema a identificar (sobre-amortiguado)
+// Es necesario recolectar datos experimentales de respuesta escalón,
+// o usar el archivo proporcionado
 // ---------------------------------------------
 
 Tol = 0.0002;  // Tolerancia de error medio cuadratico
@@ -22,11 +23,11 @@ t=t0:Ts:(N-1)*Ts;
 x0=[0;0];
 u_amp=mean(u);
 
-Datos= [u; y]'  // <<---- Practica modificar aqui para leer los datos del archivo xls con las plantas. 
+Datos= [u; y]'  // <<---- Par entrada/salida
 
 it=1;
 J=Tol*2;
-lambda0= 1;
+lambda0= 1;   
 lambda1=2;
 
 while(1)
