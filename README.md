@@ -9,42 +9,51 @@
 Este proyecto muestra como implementar controladores y observadores lineales mediante la plataforma Arduino.
 
 ## Hardware
-El algoritmo de control/observación se realiza en la plataforma Arduino UNO R3 y una planta RC-RC, con R1 = R2 = 1 ohm, y C1 = C2 = 1 uf. Una descripción del hardware usado es mostrada en la Figura. 
+El algoritmo de control/observación se realiza en la plataforma Arduino UNO R3 y una planta RC-RC, con $R1 = R2 = 1$ Mohm, y $C1 = C2 = 1$ uf. Una descripción del hardware usado es mostrada en la Figura siguiente.  En adición a la planta RC-RC, se usa un potenciometro para generar la referencia externa, un par de switches para iniciar y detener el algoritmo de control, y un par de Leds para mostrar el estado del sistema.
 
 ![Circuito eléctrico](./imagenes/circuito.png)
 
 ### La lista de partes es la siguiente:
 
 * Una placa de desarrollo Arduino UNO R3
-* Opcional (Un shield LCFIME-PCB 1.0)
+* Un breadboard o un shield LCFIME-PCB 1.0-RC3.
 * 2 resistencias de 1 Mohm. 
 * 2 capacitores de 1 uf.
-* 1 Potenciometro 100 K
+* 1 Potenciometro 100 Kohm
 * 2 Resistencias 330 ohms
 * 2 Resistencias 4.7 kohms
 * 2 Leds
 * 2 Switches
 
-Todos los componentes pueden ser montados en un breadboard de acuerdo a la figura presnetada, o en el shield.
+Todos los componentes pueden ser montados en un breadboard de acuerdo a la figura presentada, o pueden ser soldados en el shield sugerido.
 
-### Las entradas y salidas del sistema son las siguientes  
+### Descripción de IO
 
-* Pin A0 Referencia a seguir
-* Pin A1 Voltaje en el capacitor 1
-* Pin A2 Voltaje en el capacitor 2
-* Pin 10 Señal de control
-* Pin 2 Entrada de arranque
-* Pin 3 Entrada de paro
-* Pin 8 Indicador LED sistema activado
-* Pin 9 Indicador LED sistema desactivado
+Las entradas y salidas del sistema están conectadas a los siguientes pines.
+
+#### Entradas analógicas
+* **Pin A0.** Referencia a seguir, denotado por R en el software y por $r(t)$ en la descripción del algoritmo.
+* **Pin A1.** Voltaje en el capacitor 1, denotado por X1 en el software y por $x_{1}(t)$ en la descripción del algoritmo.
+* **Pin A2.** Voltaje en el capacitor 2, denotado por X2 en el software y por $x_{2}(t)$ en la descripción del algoritmo.
+
+#### Salidas analógicas (PWM)
+* **Pin 10.** Señal de control, denotado por U en el software y por $u_{i}(t)$ en la descripción del algoritmo.
+
+#### Entradas discretas
+* **Pin 2.** Entrada de arranque, denotado por SW2 en el software.
+* **Pin 3.** Entrada de paro,  denotado por SW3 en el software.
+
+#### Salidas discretas
+* **Pin 8.** Indicador LED sistema activado, denotado por LED8 en el software.
+* **Pin 9.** Indicador LED sistema desactivado, denotado por LED9 en el software.
 	
-## Modelo
+## Modelo matemático
 
-El modelo dinámico del circuito RC-RC es un sistema de segundo orden que puede ser representado en espacio de estados de la manera siguiente.
+Consideramos al voltaje $u_i(t)$ que alimenta a la primer malla como la entrada de la planta RC-RC, y al voltaje en el segundo capacitor $V_{C_2}(t)$ como salida. La descripción del circuito es mostrada a continuación.
 
 ![Planta RC-RC](./imagenes/planta.png)
 
-Primeramente, se usa la ley de mallas de Kirchhoff:
+El modelo dinámico del circuito RC-RC es un sistema de segundo orden que puede ser representado en espacio de estados de la manera siguiente. Primeramente, se usa la ley de mallas de Kirchhoff:
 ```math
 \begin{eqnarray*}
   u_i(t) & = & i_1(t)R_1+V_{C1}(t),  \\
@@ -58,9 +67,9 @@ junto con las relaciones a ser cumplidas por los capacitores:
   i_2(t) & = & C_2\frac{dV_{C2}(t)}{dt},
 \end{eqnarray*}
 ```
-por lo tanto $i_1(t)=C_2\frac{dV_0(t)}{dt}+C_1\frac{dV_{C1}(t)}{dt}$
+por lo tanto $i_1(t)=C_2\frac{dV_0(t)}{dt}+C_1\frac{dV_{C1}(t)}{dt}$.
 
-Re escribiendo las ecuaciones de malla en funcion de los voltajes en los capacitores y sus derivadas:
+Re escribiendo las ecuaciones de malla en función de los voltajes en los capacitores y sus derivadas:
 ```math
 \begin{eqnarray*}
 u_i(t) & = & R_1C_2 \frac{dV_0(t)}{dt} +  R_1C_1 \frac{dV_{C1}(t)}{dt} + V_{C1}, \\
@@ -77,10 +86,10 @@ y acomodando en forma matricial, se tiene
 Considerando la inversa:
 ```math
 \begin{eqnarray*}
-\left[\begin{array}{cc}R_1C_1 & R_1C_2 \\ 0 & R_2C_2\end{array}\right]^{-1} & = & \frac{1}{R_1C_1R_2C_2}\left[\begin{array}{cr}R_2C_2 & -R_1C_2 \\ 0 & R_1C_1\end{array}\right]\\ & = & \left[\begin{array}{cr}\frac{1}{R_1C_1} & \frac{-1}{R_2C_1} \\ 0 & \frac{1}{R_2C_2}\end{array}\right],
+\left[\begin{array}{cc}R_1C_1 & R_1C_2 \\ 0 & R_2C_2\end{array}\right]^{-1} & = & \frac{1}{R_1C_1R_2C_2}\left[\begin{array}{cr}R_2C_2 & -R_1C_2 \\ 0 & R_1C_1\end{array}\right], \\ & = & \left[\begin{array}{cr}\frac{1}{R_1C_1} & \frac{-1}{R_2C_1} \\ 0 & \frac{1}{R_2C_2}\end{array}\right],
 \end{eqnarray*}
 ```
-el sistema queda:
+el sistema queda representado por
 ```math
 \begin{eqnarray*}
   \left[\!\! \begin{array}{l}\dot{V}_{C_1} \\ \dot{V}_o \end{array}\!\! \right]\!\! & \!\! =\!\!  &\!\!  \left[\!\! \begin{array}{cr}\frac{1}{R_1C_1} & \frac{-1}{R_2C_1} \\ 0 & \frac{1}{R_2C_2}\end{array}\right]\!\! \left[\!\! \begin{array}{rr}-1 & 0 \\ 1 & -1  \end{array}\right]\!\! \left[\!\! \begin{array}{l}V_{C_1}\\V_o\end{array}\right]\!\! +\!\! \left[\!\! \begin{array}{cr}\frac{1}{R_1C_1} & \frac{-1}{R_2C_1} \\ 0 & \frac{1}{R_2C_2}\end{array}\right]\!\! \left[\!\! \begin{array}{c}1 \\ 0 \end{array}\!\! \right]u_i(t).
@@ -97,59 +106,98 @@ Definiendo las variables de estado como sigue;
 el modelo en espacio de estados es: 
 ```math
 \begin{eqnarray*}
-  \left[\!\!\begin{array}{l}\dot{x}_{1}(t) \\ \dot{x}_2 (t) \end{array}\!\!\right] & = &  \left[\!\!\begin{array}{cr}-\frac{1}{R_1C_1}-\frac{1}{R_2C_1} & \frac{1}{R_2C_1} \\ \frac{1}{R_2C_2} & -\frac{1}{R_2C_2}\end{array}\!\!\right]\!\!\left[\begin{array}{l}x_{1}(t) \\ x_2(t) \end{array}\!\!\right]\!\!+\!\!\left[\!\!\begin{array}{c}\frac{1}{R_1C_1} \\ 0 \end{array}\right]u_i(t) \\ 
+  \left[\!\!\begin{array}{l}\dot{x}_{1}(t) \\ \dot{x}_2 (t) \end{array}\!\!\right] & = &  \left[\!\!\begin{array}{cr}-\frac{1}{R_1C_1}-\frac{1}{R_2C_1} & \frac{1}{R_2C_1} \\ \frac{1}{R_2C_2} & -\frac{1}{R_2C_2}\end{array}\!\!\right]\!\!\left[\begin{array}{l}x_{1}(t) \\ x_2(t) \end{array}\!\!\right]\!\!+\!\!\left[\!\!\begin{array}{c}\frac{1}{R_1C_1} \\ 0 \end{array}\right]u_i(t), \\ 
   y(t) & = & \left[\begin{array}{cc}0 & 1\end{array}\right]\left[\begin{array}{c}x_{1}(t) \\ x_2(t) \end{array}\right],
 \end{eqnarray*}
 ```
 donde $x_{1}(t)$ es el voltaje en el primer capacitor (conectado al pin A1), $x_{2}(t)$ el voltaje en el segundo (conectado al pin A2), $u(t)$ es la entrada a la planta (conectado al pin 10), y $y(t)$ la salida de la planta (conectado al pin A2). 
 
+De manera abreviada, el sistema se describirá de aquí en adelante en formato matricial por:
+```math
+\begin{eqnarray*}
+  \dot{x}(t) & = & Ax(t)+Bu_i(t), \\ 
+  y(t) & = &Cx(t),
+\end{eqnarray*}
+```
+donde 
+```math 
+A=\left[\!\!\begin{array}{cr}-\frac{1}{R_1C_1}-\frac{1}{R_2C_1} & \frac{1}{R_2C_1} \\ \frac{1}{R_2C_2} & -\frac{1}{R_2C_2}\end{array}\!\!\right], \quad B=\left[\!\!\begin{array}{c}\frac{1}{R_1C_1} \\ 0 \end{array}\right], \quad C=\left[\begin{array}{cc}0 & 1\end{array}\right].
+```
+
 ## Diseño de controladores y observadores
 
-### Controlador
-Iniciamos resolviendo el problema de regulación considerando  $K \stackrel{\triangle}{=} [k_1 \quad k_2 ].$ El polinomio característico de lazo cerrado (obtenido de manera simbólica) queda:
+### Regulador por retroalimentación de estado
 
+Se considera la ley de control
+```math
+$$
+u_i(t) = -K x(t) = - k_1x_1(t) - k_2 x_2(t).
+$$
+```
+Donde $K \stackrel{\triangle}{=} [k_1 \quad k_2 ]$ es tal que $(A-BK)$ cumple con cierto polinomio característico deseado.
+Iniciamos resolviendo el problema de regulación considerando  $K \stackrel{\triangle}{=} [k_1 \quad k_2 ].$ El polinomio característico de lazo cerrado (obtenido de manera simbólica) para el sistema RC-RC queda descrito por:
 ```math
 \begin{eqnarray*}
-|\lambda I-A+BK| & = & \lambda^2+\left(\frac{1}{R_1C_1}+\frac{1}{R_2C_1}+\frac{k_1}{R_1C_1}+\frac{1}{R_2C_2}\right)\lambda \\ & & +\frac{1}{R_1C_1R_2C_2}+\frac{1}{R_2C_1R_2C_1}+\frac{k_1}{R_1C_1R_2C_2} \\ & & -\frac{1}{R_2C_1R_2C_2}+\frac{k_2}{R_2C_2R_1C_2}
+|\lambda I-A+BK| & = & \lambda^2+\left(\frac{1}{R_1C_1}+\frac{1}{R_2C_1}+\frac{k_1}{R_1C_1}+\frac{1}{R_2C_2}\right)\lambda \\ & & +\frac{1}{R_1C_1R_2C_2}+\frac{1}{R_2C_1R_2C_1}+\frac{k_1}{R_1C_1R_2C_2} \\ & & -\frac{1}{R_2C_1R_2C_2}+\frac{k_2}{R_2C_2R_1C_2}.
 \end{eqnarray*}
 ```
 
-Considerando que los valores propios deseados de lazo cerrado como $\{-a_1,-a_2\}$ y $a_1>0$, $a_2>0$. El polinomio característico deseado queda: $$(\lambda+a1)(\lambda+a2) = \lambda ^2 + (a1+a2)\lambda + a1\cdot a2$$ Los valores de $k_1$ y $k_2$ se obtienen de igualar ambos polinomios: $$a1 + a2 = \frac{1}{R_1C_1}+\frac{1}{R_2C_1}+\frac{k_1}{R_1C_1}+\frac{1}{R_2C_2}$$ por lo tanto:
-$$k_1 = R_1C_1 \left( a1 + a2 - \frac{1}{R_1C_1}- \frac{1}{R_2C_1}-\frac{1}{R_2C_2}\right)$$
-por otro lado:
+Considerando que los valores propios deseados de lazo cerrado como $\{-a_1,-a_2\}$ y $a_1>0$, $a_2>0$. El polinomio característico deseado queda descrito por: $$(\lambda+a1)(\lambda+a2) = \lambda ^2 + (a1+a2)\lambda + a1\cdot a2$$ Los valores de $k_1$ y $k_2$ se obtienen de igualar ambos polinomios coeficiente por coeficiente. Para el término lineal se tiene: 
 ```math
-\begin{eqnarray*}
-a1\cdot a2 & = & \frac{1}{R_1C_1R_2C_2}+\frac{1}{R_2C_1R_2C_1}+\frac{k_1}{R_1C_1R_2C_2}-\frac{1}{R_2C_1R_2C_2}\\ & & + \frac{k_2}{R_2C_2R_1C_2}
-\end{eqnarray*}
+$$a1 + a2 = \frac{1}{R_1C_1}+\frac{1}{R_2C_1}+\frac{k_1}{R_1C_1}+\frac{1}{R_2C_2},$$ 
 ```
-despejando la ganancia $k_2$:
+mientras que para el término independeinte se tiene
 ```math
 \begin{eqnarray*}
-  k_2 & = & R_1C_2R_2C_2 \left( a1 a2\!-\!\frac{1}{R_1C_1R_2C_2}-\frac{1}{R_2C_1R_2C_1} -\frac{k_1}{R_1C_1R_2C_2}\right. \\ & & \left. +\frac{1}{R_2 C_1 R_2 C_2}\right)
+a1\cdot a2 & = & \frac{1}{R_1C_1R_2C_2}+\frac{1}{R_2C_1R_2C_1}+\frac{k_1}{R_1C_1R_2C_2}-\frac{1}{R_2C_1R_2C_2}\\ & & + \frac{k_2}{R_2C_2R_1C_2}.
 \end{eqnarray*}
 ```
 
+Por lo tanto, las siguientes expresiones para el par $k_1, k_2$ pueden ser obtenidas:
+```math
+$$k_1 = R_1C_1 \left( a1 + a2 - \frac{1}{R_1C_1}- \frac{1}{R_2C_1}-\frac{1}{R_2C_2}\right).$$
+```
 
-### Observador
-
-Sea $L = \left[\begin{array}{c}L_1 \\ L_2\end{array}\right]$ la ganancia requerida para dise\~nar un observador. Determinando el polinomio caracter\'{\i}stico del observador:
 ```math
 \begin{eqnarray*}
-  |\lambda I - A+LC| & = & \lambda ^2+\left(\frac{1}{R_1C_1}+\frac{1}{R_2C_2}+\frac{1}{R_2C_2}+L_2\right)\lambda \\ & & + \left(\frac{1}{R_1C_1}+\frac{1}{R_2C_1}\right) \left(\frac{1}{R_2C_2}+L_2\right)\\ & & +\frac{1}{R_2C_2}\left(L_1-\frac{1}{R_2C_1}\right).
+  k_2 & = & R_1C_2R_2C_2 \left( a1 a2\!-\!\frac{1}{R_1C_1R_2C_2}-\frac{1}{R_2C_1R_2C_1} -\frac{k_1}{R_1C_1R_2C_2}\right. \\ & & \left. +\frac{1}{R_2 C_1 R_2 C_2}\right).
 \end{eqnarray*}
 ```
 
-Considerando los valores propios deseados para el observador: $\{-b_1, -b_2\}$, con $b_1>0$ y $b_2>0$. El polinomio caracter\'{\i}stico del observador es:
+
+### Observador de Luenberger
+
+Considere un observador descrito por:
+```math
+\begin{eqnarray*}
+  \dot{x}_e(t) & = & Ax_e(t)+Bu_i(t)+H(y(t) - Cx_e(t)), \\ 
+  y_e(t) & = &Cx_e(t),
+\end{eqnarray*}
+```
+Donde $A,B,C$ corresponden a las matrices definidas para el sistema RC-RC a observar, y $L = [l_1 \quad l_2]$ representa las ganancias del observador. 
+Para garantizar $\textrm{lim}_{t\rightarrow \infty }x_e(t) = x(t)$ es necesario ubicar los vaores propios de $A-LC$ mediante $L$.
+
+Determinando el polinomio característico del observador:
+```math
+\begin{eqnarray*}
+  |\lambda I - A+LC| & = & \lambda ^2+\left(\frac{1}{R_1C_1}+\frac{1}{R_2C_2}+\frac{1}{R_2C_2}+l_2\right)\lambda \\ & & + \left(\frac{1}{R_1C_1}+\frac{1}{R_2C_1}\right) \left(\frac{1}{R_2C_2}+l_2\right)\\ & & +\frac{1}{R_2C_2}\left(l_1-\frac{1}{R_2C_1}\right).
+\end{eqnarray*}
+```
+
+Considerando los valores propios deseados para el observador: $\{-b_1, -b_2\}$, con $b_1>0$ y $b_2>0$. El polinomio característico del observador es:
 $$( \lambda + b_1)(\lambda+b_2)=\lambda^2+(b_1+b_2)\lambda+b_1\cdot b_2.$$ 
 
 Igualando coeficientes de ambos polinomios: 
-$$\frac{1}{R_1C_1}+\frac{1}{R_2C_2}+\frac{1}{R_2C_2}+L_2=b_1+b_2$$
+$$\frac{1}{R_1C_1}+\frac{1}{R_2C_2}+\frac{1}{R_2C_2}+l_2=b_1+b_2,$$
 
-$$L_2=b_1+b_2-\frac{1}{R_1C_1}-\frac{1}{R_2C_2}-\frac{1}{R_2C_2}$$
+$$b_1\cdot b_2= \left(\frac{1}{R_1C_1}+\frac{1}{R_2C_1}\right) \left(\frac{1}{R_2C_2}+l_2\right)+\frac{1}{R_2C_2}\left(l_1-\frac{1}{R_2C_1}\right).$$
 
-$$b_1\cdot b_2= \left(\frac{1}{R_1C_1}+\frac{1}{R_2C_1}\right) \left(\frac{1}{R_2C_2}+L_2\right)+\frac{1}{R_2C_2}\left(L_1-\frac{1}{R_2C_1}\right)$$
+A partir de estas relaciones, es posible obtener el par $l_1, l_2$:
 
-$$L_1 = R_2C_2\left[b_1\cdot b_2 - \left(\frac{1}{R_1C_1}+\frac{1}{R_2C_1}\right) \left(\frac{1}{R_2C_2}+{L_2}\right)\right]+\frac{1}{R_2C_1}$$
+$$l_1 = R_2C_2\left[b_1\cdot b_2 - \left(\frac{1}{R_1C_1}+\frac{1}{R_2C_1}\right) \left(\frac{1}{R_2C_2}+{l_2}\right)\right]+\frac{1}{R_2C_1},$$
+
+$$l_2=b_1+b_2-\frac{1}{R_1C_1}-\frac{1}{R_2C_2}-\frac{1}{R_2C_2}.$$
+
 
 ### Servosistemas
 
