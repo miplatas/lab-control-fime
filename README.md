@@ -746,4 +746,48 @@ void botonesyleds(){
 }
 ```
 
+#### Rutinas de comunicación con PC
+
+Hay dos rutinas de comunicación con monitores del puerto serie. Estas rutinas sirven para ver y almacenar los datos en la PC. **Solamente una de las dos rutinas puede usarse a la ves, si es necesario cambiar la rutina puede comentar uno y descomentar otra en la rutina principal loop() **
+
+* La rutina coms_arduino_ide() envia datos en formato ASCII en el puerto serie, los datos se encuentran separado por coma, cada dato contiene un nombre separado del dato por :, la cadena de datos termina con un retorno de carro. Use esta rutina si va a monitorear los datos con Arduino IDE.
+* La rutina coms_python() envia datos float byte por byte. Cada dato ocupa 4 bytes. Use esta rutina si monitorea con el script "monitor.py" que se encuentra en la carpeta Monitores de este proyecto.
+
+```cpp
+//-- Comunicación con monitor --//
+void coms_arduino_ide(){  
+  Serial.print("y_d(t):");            // Referencia
+  Serial.print(R);                    // Referencia
+  Serial.print(",");                  // Separador     
+  Serial.print("y(t):");              // Salida
+  Serial.println(Y);                  // Salida (terminar con "serial.println")
+}
+
+
+void coms_python(float* Rp, float* Yp, float* Up)
+{
+  byte* byteData1 = (byte*)(Rp);
+  byte* byteData2 = (byte*)(Yp);
+  byte* byteData3 = (byte*)(Up);
+  byte buf[12] = {byteData1[0], byteData1[1], byteData1[2], byteData1[3],
+                 byteData2[0], byteData2[1], byteData2[2], byteData2[3],
+                 byteData3[0], byteData3[1], byteData3[2], byteData3[3]};
+  Serial.write(buf, 12);
+}
+```
+
+#### Rutinas para el control de tiempo
+El proposito de esta rutina es determinar el tiempo que tarda el programa en ejecutarse, y agregar un retardo variable para asegurar que todos los ciclos se ejecutan a la velocidad uniforme indicada en el tiempo de muestreo TS.
+```cpp
+//-- Para muestreo uniforme --//
+void espera(){   
+  TS_code = millis()- TIC;                 // Tiempo de ciclo
+  TC = TS - TS_code;                       // Calcula faltante para TS
+  if (TS_code < TS) delay(TC);             // Espera para completar ciclo de TS   
+  TIC = millis();
+}
+```
+
 ### Software PC
+
+En adición al monitor serial, puede usar el script "monitor.py" localizado en la carpeta monitores. Este script realiza el monitore de datos en una gráfica y el registro de los mismos a un archivo CSV.
