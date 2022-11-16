@@ -80,9 +80,8 @@ while(1)
     sl=syslin('c',Ai,Bi,Ci)
     Hi=ss2tf(sl);
     
-    eigAi = spec(Ai)
-    lambda1 = abs(eigAi(1) + eigAi(2));
-    lambda0 = abs(eigAi(1)*eigAi(2));
+    lambda1 = a1;
+    lambda0 = a0;
 
     // Simulación numérica de sistema identificado
     function xdot=linearident(t, x)
@@ -93,8 +92,7 @@ while(1)
 
     // Función de costo
     J=((y-yi)*(y-yi)')/N;
-    lambda0= 0.153687;
-    lambda1=1.3709633;
+
     // Iteraciones.
     it = it + 1;
     
