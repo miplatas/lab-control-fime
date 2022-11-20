@@ -99,8 +99,8 @@ void loop() {
   proc_entradas();                    // Procesamiento de Entradas
   control();                          // Control
   proc_salidas();                     // Procesado de Salidas
-  //coms_arduino_ide();               // Comunicaciones
-  coms_python(&R,&Y,&U);
+  coms_arduino_ide();               // Comunicaciones
+  //coms_python(&R,&Y,&U);
   espera();
 }
 
