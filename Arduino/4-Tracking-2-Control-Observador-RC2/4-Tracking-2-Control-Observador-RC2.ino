@@ -20,7 +20,7 @@
 // ------- Frecuencia de la referenca------------
 // *********************************************************//
   #define omega1 0.2
-  #define omega2 0.3
+  #define omega2 0.6
 // ******************************************************** //
 
 // ******************************************************** //
@@ -126,7 +126,7 @@
 //----------  Observador --------//
 //-- Estados obs --//
   float W1 = 0; // Estado exosistema 1 en k, W1[k]
-  float W2 = 1/3; // Estado exosistema 2 en k, W2[k]
+  float W2 = 0.333; // Estado exosistema 2 en k, W2[k]
   float W3 = 0; // Estado exosistema 1 en k, W1[k]
   float W4 = -1; // Estado exosistema 2 en k, W2[k]
   float WN1 = 0; // Estado exosistema 1 en k+1, W1[k+1]
@@ -193,10 +193,10 @@ void setup() {
   K1 = p11*(sum_a - 1/p11 - 1/p21 - 1/p22);
   K2 = p12*p22*(prod_a - 1/(p11*p22) - 1/(p21*p21) - K1/(p21*p22) + 1/(p21*p22));
   Kp = K1 + K2 + 1;
-  G1 = 1 - omega1*omega1*p11*p22+K1 + K2;
-  G2 = omega2*(p22 + p12) - K1*omega2*p22;
-  G3 = p11*(1/p11 + 1/p21 - omega2*omega2*p22) + K1 + K2;
-  G4 = omega1*(1 + p22/p11 + p22/p21) + omega1*K1*p21;
+  G1 = 1 - omega1*omega1*p11*p22 + K1 + K2;
+  G2 = -omega2*p11*(p22/p11 + p12/p11 + 1) - K1*omega2*p22;
+  G3 = 1 - omega2*omega2*p22*p11 + K1 + K2;
+  G4 = omega1*p11*(1 + p22/p11 + p22/p21) + omega1*K1*p21;
   
   // Ganancias de Observador
   // Xe[k+1] = A*Xe[k] + B*U[k] + H*(Y[k]-Xe2[k])
