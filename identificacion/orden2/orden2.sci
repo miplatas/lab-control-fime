@@ -1,20 +1,34 @@
+
 // Identificacion de sistema de 2do 
 clc
 clear
+
+printf("************************************************************************************** \n")
+printf("************************************************************************************** \n")
+printf("Identificacion de sistema de 2do orden \n")
+printf("************************************************************************************** \n")
+printf("************************************************************************************** \n")
+
+itmax = input("Número de iteraciones -> ") // El programa termina al cumplir itmax iteraciones
+tol = 0.000000000000001; // El programa termina cuando la mejora en el MSE sea menor a tol
+
 // ---------------------------------------------
 // Es necesario recolectar datos experimentales de respuesta escalón,
 // o usar el archivo proporcionado
 // ---------------------------------------------
 
-tol = 0.000000000000001; // El programa termina cuando la mejora en el MSE sea menor a tol
-itmax = 20;    // Máximas iteraciones para buscar
 
 // Directorio donde se encuentran los datos, cambiar con tu directorio 
 path = '/home/miguel/Dropbox/Trabajo/2022/RC-Arduino/Identificacion/';
-Datos = evstr(read_csv(path + 'datos-2022-11-15T20:47:22.004556.csv'));
+Datos = evstr(read_csv(path + 'datos-2022-11-19T23:34:58.697845.csv'));
 
-u=Datos(235:1500,4).';
-y=Datos(235:1500,3).';
+// Escalón
+u=Datos(127:744,5).';
+y=Datos(127:744,4).';
+
+// PRBS
+//u=Datos(2305:3680,5).';
+//y=Datos(2305:3680,4).';
 
 N=length(y);
 Ts=0.05;
@@ -29,7 +43,8 @@ it=1;
 J=0;
 lambda0= 100;   
 lambda1=20;
-
+J=zeros(itmax,1);
+Jbest = 1;
 while(1)
     // Sistema para filtrar datos de entrada y salida
 
@@ -88,8 +103,21 @@ while(1)
     yi = csim(u,t,sl);
 
     // Función de costo
-    JR = J;
-    J=((y-yi)*(y-yi)')/N;
+    J(it,1)=((y-yi)*(y-yi)')/N;
+    
+    if it > 2
+        if J(it,1) < Jbest 
+            Hbest = Hi;
+            Jbest = J(it,1)
+            ybest = yi;
+        end
+        
+        if (abs(J(it,1)-J(it-1,1)) < tol)
+            disp("El programa termina porque |J(" + string(it-1) + ")-J(" + string(it-2) + ")| < " + string(tol))
+            break;
+        end
+    end
+    
     
     // Salida del loop.
     if it > itmax
@@ -97,31 +125,30 @@ while(1)
         break
     end
 
-    if (abs(JR-J) < tol)
-        disp("El programa termina porque |J(" + string(it-1) + ")-J(" + string(it-2) + ")| < " + string(tol))
-        break;
-        
-    end
-
     // Resultados.
-    printf("*************************************************************************** \n")
-    printf("En la iteración " + string(it) + ", el MSE es de " + string(J) + ". \n\n")
-    printf("La función de transferencia propuesta para el sistema en la iteración " +    string(it) + "es: \n\n")
-    disp(Hi)
-    printf("\n\n")
-    printf("El MSE entre la salida identificada y la salida medida es de " + string(J) + ".\n")
-    printf("*************************************************************************** \n")
-    
-    // Muestra resultados 
-    scf(1), clf; // Fig 1
-    plot(t',y',t',yi','Linewidth',2)
-    xgrid
-    title('Salidas','fontsize',3)
-    legend('$\Large{y(t)}$','$\Large{\hat{y}(t)}$',4)
-    xlabel('tiempo','fontsize',3)
-
+    printf("En la iteración " + string(it) + ", el MSE es de " + string(J(it,1)) + ". \n\n")
+   
     // Iteraciones.
     it = it + 1;
 
 end
+
+    printf("************************************************************************************** \n")
+    printf("************************************************************************************** \n")
+    printf("La mejor función de transferencia propuesta para el sistema en el sentido del MSE es: \n\n")
+    disp(Hbest)
+    printf("\n\n")
+    printf("El MSE entre la salida identificada y la salida medida es de " + string(Jbest) + ".\n")
+    printf("************************************************************************************** \n")
+    printf("************************************************************************************** \n")
+
+
+    scf(2), clf; // Fig 2
+    plot(t',y',t',ybest','Linewidth',2)
+    xgrid
+    title('Salidas','fontsize',3)
+    legend('$\Large{y_(t)}$','$\Large{\hat{y}(t)}$',4)
+    xlabel('tiempo','fontsize',3)
+
+
 
