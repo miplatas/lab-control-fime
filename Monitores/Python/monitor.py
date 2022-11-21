@@ -165,10 +165,10 @@ class serialPlot:
             #print(self.rawData)
 
     def getSerialData(self, frame, lines, lineValueText, lineLabel, timeText,RecData):
-        if sys.version[0] == 3:
-            currentTimer = time.perf_counter() #time.clock() #time.perf_counter()
+        if sys.version[0] == '2':
+            currentTimer =  time.clock()
         else:
-            currentTimer = time.clock() #time.perf_counter()
+            currentTimer = time.perf_counter()
         self.plotTimer = int((currentTimer - self.previousTimer) * 1000)     # the first reading will be erroneous
         self.previousTimer = currentTimer
         timeText.set_text('Intervalo de tiempo en = ' + str(self.plotTimer) + 'ms')
