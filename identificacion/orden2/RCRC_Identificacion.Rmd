@@ -15,8 +15,8 @@ library(control)
 library(sysid)
 
 # Lectura de datos 
-
-datos <- read.csv("/home/efx/Dropbox/2022/Arduino/Identificado/RCRC_datos0.csv")
+# Incluir el directorio donde se encuentran los datos:
+datos <- read.csv("/.../datos-2022-11-19T23:34:58.697845.csv")
 n_ro <- nrow(datos)
 
 dato <- datos[150:n_ro,]
