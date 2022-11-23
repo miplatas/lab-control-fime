@@ -1,0 +1,177 @@
+---
+title: 'Identificación Paramétric RCRC: Mínimos Cuadrados'
+output:
+  pdf_document: default
+  html_notebook: default
+---
+# Identificación del Sistema RC-RC 
+## Forma de regresor y mínimos cuadrados
+
+### Carga de datos (Tomados del Git-Hub)
+
+```{r}
+# Cargando la libreria de control
+library(control)
+library(sysid)
+
+# Lectura de datos 
+
+datos <- read.csv("/home/efx/Dropbox/2022/Arduino/Identificado/RCRC_datos0.csv")
+n_ro <- nrow(datos)
+
+dato <- datos[150:n_ro,]
+u <- dato[,5]
+y <- dato[,4]
+
+n_r <- length(u)
+
+# Parámetros matemáticos nominales
+b0n = 1 
+b1n = 0
+a0n = 1
+a1n = 3
+  
+# Vector de tiempo total
+Ts = 0.05
+t <- c(1:n_r)
+t <- Ts*t
+
+ui <- u
+yi <- y
+t1 <- t
+
+```
+### Para sistema de 2do Orden
+
+Se inicia definiendo el valor de la L2 (en este caso se requieren de dos valores)
+
+```{r}
+# Selección de polos deseados para el filtro
+p1 <- c(-4)
+p2 <- c(-5)
+
+# Cálculo de coeficientes requeridos en la forma canónica
+systf2 <- zp2tf(zpk(NULL, c(p1,p2), 1))
+den <- systf2$den
+L20 <- den[3]
+L21 <- den[2]
+
+# Matrices del filtro  
+AF2 <- matrix(c(0, 1, -L20, -L21), nrow=2, byrow = FALSE)
+BF2 <- matrix(c(0, 1), nrow=2, byrow = TRUE)
+CF2 <- matrix(c(0, 1), nrow=1, byrow = TRUE)
+DF2 <- matrix(c(0), nrow=1, byrow = FALSE)
+Xf20 <- matrix(c(0, 0), nrow=2, byrow = TRUE)
+
+# definición del filtro 
+sF2 <- ss(AF2,BF2,CF2,DF2)
+
+tf <- c(1:n_r)
+tf <- Ts*tf
+
+# Filtrado de las señales
+xu2 <- lsim(sF2,ui,tf,Xf20)
+xy2 <- lsim(sF2,yi,tf,Xf20)
+
+# Transformación requerida para el uso de solo dos filtros.
+T1 <- matrix(c(-L21/L20, -1/L20, 1, 0), nrow=2, byrow = FALSE)
+
+# Cálculo de parámetros
+Phi2 <- cbind(t(CF2%*%(T1%*%xu2$x)),t(xu2$y),t(CF2%*%(T1%*%xy2$x)),t(xy2$y))
+
+# Quitando efecto de la condicion inicial
+Q1m <- seq(601,n_r)
+Y2m <- yi[Q1m]
+Phi2m <- Phi2[Q1m,]
+#Y2 <- yi
+PP2 <- solve(t(Phi2m)%*%Phi2m)%*%t(Phi2m)%*%Y2m
+b0e <- PP2[1,1]
+b1e <- PP2[2,1]
+a0e <- L20-PP2[3,1]
+a1e <- L21-PP2[4,1]
+
+print("Primera iteración")
+par_resN = cbind(b0n,b1n,a0n,a1n)
+par_resE = cbind(b0e,b1e,a0e,a1e)
+par_res = rbind(par_resN, par_resE)
+rownames(par_res)<-c("Nominal","Estimados")
+colnames(par_res)<-c("b0","b1","a0","a1")
+print(par_res)
+
+
+# Automatización del proceso
+print("Error L menos estimados:")
+print(abs(L20-a0e + L21-a1e ))
+#print("Valores estimados:")
+#print(ae)
+
+# Inicialización de variables
+a0ea = a0e
+a1ea = a1e
+nrep = 0 
+while(( (abs(L20-a0e) + abs(L21-a1e)) > 0.00001)&(nrep < 15 )){
+  L20 <- abs(a0ea) 
+  L21 <- abs(a1ea)
+  
+  # Matrices del filtro  
+  AF2 <- matrix(c(0, 1, -L20, -L21), nrow=2, byrow = FALSE)
+  BF2 <- matrix(c(0, 1), nrow=2, byrow = TRUE)
+  CF2 <- matrix(c(0, 1), nrow=1, byrow = TRUE)
+  DF2 <- matrix(c(0), nrow=1, byrow = FALSE)
+  Xf20 <- matrix(c(0, 0), nrow=2, byrow = TRUE)
+  
+  # definición del filtro 
+  sF2 <- ss(AF2,BF2,CF2,DF2)
+  tf <- c(1:n_r)
+  tf <- Ts*tf
+  
+  # Filtrado de las señales
+  xu2 <- lsim(sF2,ui,tf,Xf20)
+  xy2 <- lsim(sF2,yi,tf,Xf20)
+  
+  # Transformación requerida para el uso de solo dos filtros.
+  T1 <- matrix(c(-L21/L20, -1/L20, 1, 0), nrow=2, byrow = FALSE)
+  
+  # Cálculo de parámetros
+  Phi2 <- cbind(t(CF2%*%(T1%*%xu2$x)),t(xu2$y),t(CF2%*%(T1%*%xy2$x)),t(xy2$y))
+  # Y2 <- yi
+  # Quitando efecto de la condicion inicial
+  # Q1m <- seq(701,6400)
+  Y2m <- yi[Q1m]
+  Phi2m <- Phi2[Q1m,]
+  #Y2 <- yi
+  PP2 <- solve(t(Phi2m)%*%Phi2m)%*%t(Phi2m)%*%Y2m
+  
+  #  PP2 <- solve(t(Phi2)%*%Phi2)%*%t(Phi2)%*%Y2
+  b0e <- PP2[1,1]
+  b1e <- PP2[2,1]
+  a0e <- L20-PP2[3,1]
+  a1e <- L21-PP2[4,1]  
+  
+  a0ea = a0e
+  a1ea = a1e
+#  print(a0ea)
+#  print(a1ea)
+   test <- abs(L20-a0e + L21-a1e)
+    print(test)
+  #print("a1e:", a1ea)
+   nrep = nrep + 1
+  }
+
+### Resultados 
+
+print("Última iteración")
+par_resN = cbind(b0n,b1n,a0n,a1n)
+par_resE = cbind(b0e,b1e,a0e,a1e)
+par_res = rbind(par_resN, par_resE)
+rownames(par_res)<-c("Nominal","Estimados")
+colnames(par_res)<-c("b0","b1","a0","a1")
+print(par_res)
+
+
+
+### Resultados 
+
+
+
+```
