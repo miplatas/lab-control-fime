@@ -235,7 +235,7 @@ void observador(){
   X0N  = X0 + Tseg*f3;
   XeR1 = XeN1;
   XeR2 = XeN2;
-  X0  = X0N;
+  X0  = Habilitado*X0N;
 }
 
 //-- Control --//
