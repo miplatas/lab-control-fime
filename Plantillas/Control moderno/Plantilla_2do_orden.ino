@@ -8,7 +8,7 @@
 //                                                          //
 // Instrucciones                                            //
 //                                                          //
-// Modificar solamente el renglón 138                       //
+// Modificar solamente el renglón 136                       //
 //                                                          //
 //      U = (4)*R - (-1)*X1 - (4)*X2;                       //
 //                                                          //
@@ -126,7 +126,7 @@ void loop() {
 
 
 // ******************************************************** //
-//---------- Rutinias de control y observador--------       //                          
+//---------- Rutinias de control             --------       //                          
 // ******************************************************** //
 
 
@@ -165,10 +165,6 @@ void proc_salidas(){
 
 //-- Memoria {0,1} para entrada escalón --//
 void botonesyleds(){
-
-  static int n = 0; 
-  if(n >= 1000/TS) n=0;                                // Señal cuadrada para led blink
-  else n = n+1;
 
   if(digitalRead(pSW2) == 1) Habilitado = 1;      // Memoria on/off en Habilitado
   else if(digitalRead(pSW3) == 1) Habilitado = 0; // Set con SW2. Reset con SW3
