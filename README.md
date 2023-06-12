@@ -1,4 +1,4 @@
-# Laboratorio de control moderno
+# Introducción de control moderno
 
 ## Tabla de contenidos
 * [Información general](#Información)
