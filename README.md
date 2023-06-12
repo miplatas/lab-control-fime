@@ -1,4 +1,4 @@
-# Introducción de control moderno
+# Introducción a control moderno
 
 ## Tabla de contenidos
 * [Información general](#Información)
