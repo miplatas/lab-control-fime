@@ -40,10 +40,10 @@ def loadconfig():
         print('Introducir informacion de conexion de manera manual.')
         if sys.platform == "linux" or sys.platform == "linux2":
             # linux
-            Port = input("Nombre del puerto a monitorear, incluir ' ', por ejemplo '/dev/ttyACM0' -> ")
+            Port = input("Nombre del puerto a monitorear, por ejemplo '/dev/ttyACM0' -> ")
         elif sys.platform == "darwin":
             # OS X
-            Port = input("Nombre del puerto a monitorear, incluir ' ', por ejemplo '/dev/tty.usb' -> ")
+            Port = input("Nombre del puerto a monitorear, por ejemplo '/dev/tty.usb' -> ")
         elif sys.platform == "win32":
             # Windows...
             Port = input("Nombre del puerto a monitorear, por ejemplo COM5 -> ")
